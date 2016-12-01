@@ -72,22 +72,22 @@ public class MatrixHelper {
 		double v = m[x][y];
 		Point tmp = new Point(x -1, y);
 
-    	if (m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
 		tmp = new Point(x + 1, y);
-    	if (m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
 		tmp = new Point(x, y - 1);
-    	if (m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
 		tmp = new Point(x, y + 1);
-    	if (m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
@@ -95,6 +95,16 @@ public class MatrixHelper {
     	return getMove(current, ret);
 
     }
+    
+    public static boolean isPointValid(Point p,double[][] m) {
+        int x = p.x;
+        int y = p.y;
+        int width = m[0].length;
+        int height = m.length;
+
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+    
     
 	public static MoveType getMove(Point start,Point end) {
 		if (start.equals(end)) return MoveType.PASS;
