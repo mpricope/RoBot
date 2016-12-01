@@ -18,10 +18,14 @@
  */
 
 package bot;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
 
+import field.Field;
 import field.LeeFill;
+import field.LeeFillGeneric;
+import field.MatrixHelper;
 import move.Move;
 import move.MoveType;
 
@@ -50,15 +54,44 @@ public class BotStarter {
 	public Move doMove(BotState state) {
 		ArrayList<MoveType> validMoveTypes = state.getField().getValidMoveTypes();
 
-		if (state.getField().getSnippetPositions().size() == 0) return new Move();
-		LeeFill lf = new LeeFill(state.getField());
+		Field field = state.getField();
+		
+		double fieldSize = field.getWidth() * field.getHeight();
+		double[][] m = LeeFillGeneric.buildIdentity(field, 1);
+		for (Point p : field.getSnippetPositions()) {
+			 
+			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
+			double[][] t = lfg.startFill(state.getField().getSnippetPositions().get(0), 1, -1/fieldSize);
+			m = MatrixHelper.multiply(m, t, LeeFillGeneric.WALL);
+		}
+		for (Point p : field.getWeaponPositions()) {
+			 
+			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
+			double[][] t = lfg.startFill(state.getField().getWeaponPositions().get(0), 1, -3/fieldSize);
+			m = MatrixHelper.multiply(m, t, LeeFillGeneric.WALL);
+		}
+
+		for (Point p: field.getEnemyPositions()) {
+			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
+			double[][] t = lfg.startFill(state.getField().getEnemyPositions().get(0), 1, -3/fieldSize);
+			t = MatrixHelper.multiply(t, -1, LeeFillGeneric.WALL);
+			m = MatrixHelper.add(m, t, LeeFillGeneric.WALL);
+		}
+		
+		MoveType tentativeMove = MatrixHelper.findMoveType(m, state.getField().getMyPosition());
+		
+		//LeeFill lf = new LeeFill(state.getField());
 		
 		if (validMoveTypes.size() <= 0) return new Move(); // No valid moves, pass
+//		MoveType leeMoveType = MoveType.PASS;
+//		if (state.getField().getSnippetPositions().size() != 0) {
+//			leeMoveType = lf.startFill(state.getField().getMyPosition());
+//		}
 
 //		MoveType randomMoveType = validMoveTypes.get(rand.nextInt(validMoveTypes.size()));
 
-		MoveType leeMoveType = lf.startFill(state.getField().getMyPosition());
-		return new Move(leeMoveType); // Return random but valid move
+		
+		return new Move(tentativeMove); // Return random but valid move
 	}
 
  	public static void main(String[] args) {
