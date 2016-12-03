@@ -58,25 +58,30 @@ public class BotStarter {
 		
 		double fieldSize = field.getWidth() * field.getHeight();
 		double[][] m = LeeFillGeneric.buildIdentity(field, 1);
+//		System.err.println(field);
 		for (Point p : field.getSnippetPositions()) {
 			 
 			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
-			double[][] t = lfg.startFill(state.getField().getSnippetPositions().get(0), 1, -1/fieldSize);
+			double[][] t = lfg.startFill(p, 1, -1/fieldSize);
+			System.err.println(MatrixHelper.asString(t));
 			m = MatrixHelper.multiply(m, t, LeeFillGeneric.WALL);
 		}
 		for (Point p : field.getWeaponPositions()) {
 			 
 			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
-			double[][] t = lfg.startFill(state.getField().getWeaponPositions().get(0), 1, -3/fieldSize);
+			double[][] t = lfg.startFill(p, 1, -3/fieldSize);
 			m = MatrixHelper.multiply(m, t, LeeFillGeneric.WALL);
 		}
+//		System.err.println(MatrixHelper.asString(m));
 
 		for (Point p: field.getEnemyPositions()) {
 			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
-			double[][] t = lfg.startFill(state.getField().getEnemyPositions().get(0), 1, -3/fieldSize);
+			double[][] t = lfg.startFill(p, 1, -3/fieldSize);
 			t = MatrixHelper.multiply(t, -1, LeeFillGeneric.WALL);
 			m = MatrixHelper.add(m, t, LeeFillGeneric.WALL);
 		}
+		System.err.println(MatrixHelper.asString(m));
+		System.err.println(state.getField().getMyPosition());
 		
 		MoveType tentativeMove = MatrixHelper.findMoveType(m, state.getField().getMyPosition());
 		

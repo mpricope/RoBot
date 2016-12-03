@@ -55,7 +55,13 @@ public class MatrixHelper {
     public static String asString(double[][] m) {
         StringBuilder output = new StringBuilder();
 
+        output.append(String.format("%9f",0.0)).append("|");
+		for (int x = 0; x < m.length; x++) {
+			output.append(String.format("%9f",0.0 + x)).append("|");
+		}
+		output.append("\n");
 		for (int y = 0; y < m[0].length; y++) {
+            output.append(String.format("%9f",0.0 + y)).append("|");
 			for (int x = 0; x < m.length; x++) {
                 output.append(String.format("%9.3f",m[x][y])).append("|");
             }
@@ -72,22 +78,22 @@ public class MatrixHelper {
 		double v = m[x][y];
 		Point tmp = new Point(x -1, y);
 
-    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
 		tmp = new Point(x + 1, y);
-    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
 		tmp = new Point(x, y - 1);
-    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
 		tmp = new Point(x, y + 1);
-    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] > v) {
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
     		v = m[tmp.x][tmp.y];
     		ret = tmp;
     	}
@@ -99,8 +105,8 @@ public class MatrixHelper {
     public static boolean isPointValid(Point p,double[][] m) {
         int x = p.x;
         int y = p.y;
-        int width = m[0].length;
-        int height = m.length;
+        int height = m[0].length;
+        int width = m.length;
 
         return x >= 0 && x < width && y >= 0 && y < height;
     }
