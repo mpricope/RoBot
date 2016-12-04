@@ -70,7 +70,26 @@ public class MatrixHelper {
 
         return output.toString();
     }
-    
+
+    public static String asString(int[][] m) {
+        StringBuilder output = new StringBuilder();
+
+        output.append(String.format("%3d",0)).append("|");
+		for (int x = 0; x < m.length; x++) {
+			output.append(String.format("%3d",x)).append("|");
+		}
+		output.append("\n");
+		for (int y = 0; y < m[0].length; y++) {
+            output.append(String.format("%3d",y)).append("|");
+			for (int x = 0; x < m.length; x++) {
+                output.append(String.format("%3d",m[x][y])).append("|");
+            }
+            output.append("\n");
+        }
+
+        return output.toString();
+    }
+
     public static MoveType findMoveType(double[][] m, Point current) {
     	Point ret = (Point)current.clone();
 		int x = current.x;
@@ -101,8 +120,49 @@ public class MatrixHelper {
     	return getMove(current, ret);
 
     }
-    
+
+    public static MoveTypeScore findMoveType(int[][] m, Point current) {
+    	Point ret = (Point)current.clone();
+		int x = current.x;
+		int y = current.y;
+		int v = 0;
+		Point tmp = new Point(x -1, y);
+
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
+    		v = m[tmp.x][tmp.y];
+    		ret = tmp;
+    	}
+		tmp = new Point(x + 1, y);
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
+    		v = m[tmp.x][tmp.y];
+    		ret = tmp;
+    	}
+		tmp = new Point(x, y - 1);
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
+    		v = m[tmp.x][tmp.y];
+    		ret = tmp;
+    	}
+		tmp = new Point(x, y + 1);
+    	if (isPointValid(tmp, m) && m[tmp.x][tmp.y] >= v) {
+    		v = m[tmp.x][tmp.y];
+    		ret = tmp;
+    	}
+    	
+    	MoveType mt = getMove(current, ret);
+    	return new MoveTypeScore(mt, m[ret.x][ret.y]);
+
+    }
+
     public static boolean isPointValid(Point p,double[][] m) {
+        int x = p.x;
+        int y = p.y;
+        int height = m[0].length;
+        int width = m.length;
+
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+    
+    public static boolean isPointValid(Point p,int[][] m) {
         int x = p.x;
         int y = p.y;
         int height = m[0].length;

@@ -20,12 +20,13 @@
 package bot;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import field.Field;
-import field.LeeFill;
-import field.LeeFillGeneric;
-import field.MatrixHelper;
+import field.LeeFill2;
+import field.MoveTypeScore;
 import move.Move;
 import move.MoveType;
 
@@ -53,50 +54,67 @@ public class BotStarter {
 	 */
 	public Move doMove(BotState state) {
 		ArrayList<MoveType> validMoveTypes = state.getField().getValidMoveTypes();
-
 		Field field = state.getField();
+		int maxDist = field.getWidth() + field.getHeight() + 2;
+		Map<MoveType,Integer> moveScores = new HashMap<>();
+		for (MoveType mt: validMoveTypes) {
+			moveScores.put(mt, maxDist);
+		}
+
 		
-		double fieldSize = field.getWidth() * field.getHeight();
-		double[][] m = LeeFillGeneric.buildIdentity(field, 1);
-//		System.err.println(field);
+		Point start = field.getMyPosition();
 		for (Point p : field.getSnippetPositions()) {
-			 
-			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
-			double[][] t = lfg.startFill(p, 1, -1/fieldSize);
-			System.err.println(MatrixHelper.asString(t));
-			m = MatrixHelper.multiply(m, t, LeeFillGeneric.WALL);
+
+			LeeFill2 lf = new LeeFill2(field);
+			MoveTypeScore ms = lf.startFill(p, start);
+			int currentScore = moveScores.get(ms.moveType);
+			if (ms.score < currentScore) {
+				moveScores.put(ms.moveType, ms.score);
+				
+			}
+			
 		}
 		for (Point p : field.getWeaponPositions()) {
-			 
-			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
-			double[][] t = lfg.startFill(p, 1, -3/fieldSize);
-			m = MatrixHelper.multiply(m, t, LeeFillGeneric.WALL);
-		}
-//		System.err.println(MatrixHelper.asString(m));
 
-		for (Point p: field.getEnemyPositions()) {
-			LeeFillGeneric lfg = new LeeFillGeneric(state.getField());
-			double[][] t = lfg.startFill(p, 1, -3/fieldSize);
-			t = MatrixHelper.multiply(t, -1, LeeFillGeneric.WALL);
-			m = MatrixHelper.add(m, t, LeeFillGeneric.WALL);
+			LeeFill2 lf = new LeeFill2(field);
+			MoveTypeScore ms = lf.startFill(p, start);
+			int currentScore = moveScores.get(ms.moveType);
+			if (ms.score < currentScore) {
+				moveScores.put(ms.moveType, ms.score);
+				
+			}
+			
 		}
-		System.err.println(MatrixHelper.asString(m));
-		System.err.println(state.getField().getMyPosition());
+		for (Point p : field.getEnemyPositions()) {
+
+			LeeFill2 lf = new LeeFill2(field);
+			MoveTypeScore ms = lf.startFill(p, start);
+			//int currentScore = moveScores.get(ms.moveType);
+			if (ms.score < 2) {
+				moveScores.put(ms.moveType, -1);
+			}
+			//moveScores.put(ms.moveType, currentScore + maxDist - ms.score);
+			
+		}
+
+		//state.getPlayers().
+		System.err.println(moveScores);
 		
-		MoveType tentativeMove = MatrixHelper.findMoveType(m, state.getField().getMyPosition());
+		MoveType candidateMove = MoveType.PASS;
+		int minScore = maxDist;
+		for (MoveType mt: moveScores.keySet()) {
+			int c = moveScores.get(mt); 
+			if ((c <= minScore)  && (c > 0)){
+				candidateMove = mt;
+				minScore = moveScores.get(mt);
+			}
+
+		}
 		
-		//LeeFill lf = new LeeFill(state.getField());
 		
 		if (validMoveTypes.size() <= 0) return new Move(); // No valid moves, pass
-//		MoveType leeMoveType = MoveType.PASS;
-//		if (state.getField().getSnippetPositions().size() != 0) {
-//			leeMoveType = lf.startFill(state.getField().getMyPosition());
-//		}
-
-//		MoveType randomMoveType = validMoveTypes.get(rand.nextInt(validMoveTypes.size()));
-
 		
-		return new Move(tentativeMove); // Return random but valid move
+		return new Move(candidateMove); // Return random but valid move
 	}
 
  	public static void main(String[] args) {
