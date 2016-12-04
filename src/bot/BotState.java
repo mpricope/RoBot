@@ -85,6 +85,19 @@ public class BotState {
     public HashMap<String, Player> getPlayers() {
         return this.players;
     }
+    
+    public Player getOpponent() {
+    	for (String pn: players.keySet()) {
+    		if (!pn.equals(myName)) {
+    			return players.get(pn);
+    		}
+    	}
+    	return null;
+    }
+    
+    public Player getMe() {
+    	return players.get(myName);
+    }
 
     public Field getField() {
         return this.field;

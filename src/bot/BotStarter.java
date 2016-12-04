@@ -18,6 +18,7 @@
  */
 
 package bot;
+
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +34,8 @@ import move.MoveType;
 /**
  * bot.BotStarter
  * 
- * Magic happens here. You should edit this file, or more specifically
- * the doMove() method to make your bot do more than random moves.
+ * Magic happens here. You should edit this file, or more specifically the
+ * doMove() method to make your bot do more than random moves.
  * 
  * @author Jim van Eeden - jim@riddles.io
  */
@@ -49,19 +50,20 @@ public class BotStarter {
 
 	/**
 	 * Does a move action. Edit this to make your bot smarter.
-	 * @param state The current state of the game
+	 * 
+	 * @param state
+	 *            The current state of the game
 	 * @return A Move object
 	 */
 	public Move doMove(BotState state) {
 		ArrayList<MoveType> validMoveTypes = state.getField().getValidMoveTypes();
 		Field field = state.getField();
-		int maxDist = field.getWidth() + field.getHeight() + 2;
-		Map<MoveType,Integer> moveScores = new HashMap<>();
-		for (MoveType mt: validMoveTypes) {
+		int maxDist = 2 * (field.getWidth() + field.getHeight());
+		Map<MoveType, Integer> moveScores = new HashMap<>();
+		for (MoveType mt : validMoveTypes) {
 			moveScores.put(mt, maxDist);
 		}
 
-		
 		Point start = field.getMyPosition();
 		for (Point p : field.getSnippetPositions()) {
 
@@ -70,9 +72,9 @@ public class BotStarter {
 			int currentScore = moveScores.get(ms.moveType);
 			if (ms.score < currentScore) {
 				moveScores.put(ms.moveType, ms.score);
-				
+
 			}
-			
+
 		}
 		for (Point p : field.getWeaponPositions()) {
 
@@ -81,44 +83,65 @@ public class BotStarter {
 			int currentScore = moveScores.get(ms.moveType);
 			if (ms.score < currentScore) {
 				moveScores.put(ms.moveType, ms.score);
-				
+
+			}
+
+		}
+		if (!state.getMe().hasWeapon()) {
+
+			for (Point p : field.getEnemyPositions()) {
+
+				LeeFill2 lf = new LeeFill2(field);
+				MoveTypeScore ms = lf.startFill(p, start);
+				// int currentScore = moveScores.get(ms.moveType);
+				if (ms.score < 2) {
+					moveScores.put(ms.moveType, -1);
+				}
+				// moveScores.put(ms.moveType, currentScore + maxDist -
+				// ms.score);
+
+			}
+		} else {
+			LeeFill2 lf = new LeeFill2(field);
+			MoveTypeScore ms = lf.startFill(field.getOpponentPosition(), start);
+			// int currentScore = moveScores.get(ms.moveType);
+			if (ms.score < 2) {
+				moveScores.put(ms.moveType, 5);
 			}
 			
 		}
-		for (Point p : field.getEnemyPositions()) {
 
+		if (state.getOpponent().hasWeapon()) {
 			LeeFill2 lf = new LeeFill2(field);
-			MoveTypeScore ms = lf.startFill(p, start);
-			//int currentScore = moveScores.get(ms.moveType);
+			MoveTypeScore ms = lf.startFill(field.getOpponentPosition(), start);
+			// int currentScore = moveScores.get(ms.moveType);
 			if (ms.score < 2) {
 				moveScores.put(ms.moveType, -1);
 			}
-			//moveScores.put(ms.moveType, currentScore + maxDist - ms.score);
-			
-		}
 
-		//state.getPlayers().
+		}
+		// state.getPlayers().
 		System.err.println(moveScores);
-		
+
 		MoveType candidateMove = MoveType.PASS;
 		int minScore = maxDist;
-		for (MoveType mt: moveScores.keySet()) {
-			int c = moveScores.get(mt); 
-			if ((c <= minScore)  && (c > 0)){
+		for (MoveType mt : moveScores.keySet()) {
+			int c = moveScores.get(mt);
+			if ((c <= minScore) && (c > 0)) {
 				candidateMove = mt;
 				minScore = moveScores.get(mt);
 			}
 
 		}
-		
-		
-		if (validMoveTypes.size() <= 0) return new Move(); // No valid moves, pass
-		
+
+		if (validMoveTypes.size() <= 0)
+			return new Move(); // No valid moves, pass
+
 		return new Move(candidateMove); // Return random but valid move
 	}
 
- 	public static void main(String[] args) {
- 		BotParser parser = new BotParser(new BotStarter());
- 		parser.run();
- 	}
- }
+	public static void main(String[] args) {
+		BotParser parser = new BotParser(new BotStarter());
+		parser.run();
+	}
+}
