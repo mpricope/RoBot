@@ -65,13 +65,21 @@ public class BotStarter {
 		}
 
 		Point start = field.getMyPosition();
+		Point oponent = field.getOpponentPosition();
 		for (Point p : field.getSnippetPositions()) {
 
 			LeeFill2 lf = new LeeFill2(field);
 			MoveTypeScore ms = lf.startFill(p, start);
 			int currentScore = moveScores.get(ms.moveType);
-			if (ms.score < currentScore) {
-				moveScores.put(ms.moveType, ms.score);
+			lf = new LeeFill2(field);
+			MoveTypeScore opSc = lf.startFill(p, oponent);
+			int score = ms.score;
+			if (ms.score > opSc.score) {
+				score += 5;
+			}
+			
+			if (score < currentScore) {
+				moveScores.put(ms.moveType, score);
 
 			}
 
@@ -89,14 +97,17 @@ public class BotStarter {
 		}
 		if (!state.getMe().hasWeapon()) {
 
+			int safeDist = 4;
 			for (Point p : field.getEnemyPositions()) {
 
 				LeeFill2 lf = new LeeFill2(field);
 				MoveTypeScore ms = lf.startFill(p, start);
 				// int currentScore = moveScores.get(ms.moveType);
-				if (ms.score < 2) {
+				if (ms.score < safeDist) {
 					moveScores.put(ms.moveType, -1);
+					safeDist += 2;
 				}
+				
 				// moveScores.put(ms.moveType, currentScore + maxDist -
 				// ms.score);
 
@@ -105,7 +116,7 @@ public class BotStarter {
 			LeeFill2 lf = new LeeFill2(field);
 			MoveTypeScore ms = lf.startFill(field.getOpponentPosition(), start);
 			// int currentScore = moveScores.get(ms.moveType);
-			if (ms.score < 2) {
+			if (ms.score < 3) {
 				moveScores.put(ms.moveType, 5);
 			}
 			
@@ -115,7 +126,7 @@ public class BotStarter {
 			LeeFill2 lf = new LeeFill2(field);
 			MoveTypeScore ms = lf.startFill(field.getOpponentPosition(), start);
 			// int currentScore = moveScores.get(ms.moveType);
-			if (ms.score < 2) {
+			if (ms.score < 4) {
 				moveScores.put(ms.moveType, -1);
 			}
 
