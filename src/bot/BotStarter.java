@@ -21,7 +21,9 @@ package bot;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -77,7 +79,7 @@ public class BotStarter {
 			if (ms.score > opSc.score) {
 				score += 5;
 			}
-			
+
 			if (score < currentScore) {
 				moveScores.put(ms.moveType, score);
 
@@ -95,19 +97,22 @@ public class BotStarter {
 			}
 
 		}
+		List<MoveTypeScore> enemies = new ArrayList<>();
+		int safeDist = 4;
+
 		if (!state.getMe().hasWeapon()) {
 
-			int safeDist = 4;
 			for (Point p : field.getEnemyPositions()) {
 
 				LeeFill2 lf = new LeeFill2(field);
 				MoveTypeScore ms = lf.startFill(p, start);
+				enemies.add(ms);
 				// int currentScore = moveScores.get(ms.moveType);
-				if (ms.score < safeDist) {
-					moveScores.put(ms.moveType, -1);
-					safeDist += 2;
-				}
-				
+				// if (ms.score < safeDist) {
+				// moveScores.put(ms.moveType, -1);
+				// safeDist += 2;
+				// }
+
 				// moveScores.put(ms.moveType, currentScore + maxDist -
 				// ms.score);
 
@@ -119,16 +124,37 @@ public class BotStarter {
 			if (ms.score < 3) {
 				moveScores.put(ms.moveType, 5);
 			}
-			
+
 		}
 
 		if (state.getOpponent().hasWeapon()) {
 			LeeFill2 lf = new LeeFill2(field);
 			MoveTypeScore ms = lf.startFill(field.getOpponentPosition(), start);
+			enemies.add(ms);
+
 			// int currentScore = moveScores.get(ms.moveType);
-			if (ms.score < 4) {
-				moveScores.put(ms.moveType, -1);
+			// if (ms.score < 4) {
+			// moveScores.put(ms.moveType, -1);
+			// }
+
+		}
+		enemies.sort(new Comparator<MoveTypeScore>() {
+
+			@Override
+			public int compare(MoveTypeScore o1, MoveTypeScore o2) {
+				// TODO Auto-generated method stub
+				return o1.score - o2.score;
 			}
+		});
+
+		for (MoveTypeScore ms : enemies) {
+			if ((ms.score < safeDist) && (hasMoreMoves(moveScores))) {
+				moveScores.put(ms.moveType, -1);
+				safeDist += 1;
+			} else {
+				break;
+			}
+			
 
 		}
 		// state.getPlayers().
@@ -149,6 +175,17 @@ public class BotStarter {
 			return new Move(); // No valid moves, pass
 
 		return new Move(candidateMove); // Return random but valid move
+	}
+	
+	private boolean hasMoreMoves(Map<MoveType, Integer> moveScores) {
+		int moves = 0;
+		for (Integer i: moveScores.values()) {
+			if (i >= 0) {
+				moves++;
+			}
+			if (moves > 1) return true;
+		}
+		return false;
 	}
 
 	public static void main(String[] args) {
